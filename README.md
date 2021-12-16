@@ -1,7 +1,7 @@
 # gds_1000b_scpi
 
 # Introduction
-GDS-1000B series digital oscillocope by GW Instek is a cost effective instrument for engineers, technicians and students.  The oscilloscope includes a USB port for remote control.  Inside the oscilloscope there is a USB to serial converter.  An external computer mounts this as a traditional serial port.
+GDS-1000B series digital oscillocope by GW Instek is a cost effective instrument for engineers, technicians and students.  The oscilloscope includes a USB port for remote control.  Inside the oscilloscope there is a USB to serial converter.  An external computer opens this as a traditional serial port.
 
 The instrument supports a reduced set of SCPI commands. SCPI is a general standard used by many equipment makers.  This python software tries to provide functions to work with the general SCPI command interface.  Some commands are unique to the GDS o-scope and these required special functions.
 
