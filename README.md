@@ -11,7 +11,7 @@ The GDS oscillocopes have demo software available that uses Python.  See [OpenWa
 
   * Originally written in python2, which is now obsolete.  This causes some dependency issues.  Some forks do upgrade the code to python 3
   * The OpenWave code is implemented as part of a Qt GUI demonstration.  The Qt GUI is more complex than needed. This doesn't really help with Jupyter Notebook.
-  * The classes and methods are dependent on the GUI.  It is a challeng to reuse this code.
+  * The classes and methods are dependent on the GUI.  It is a challenge to reuse this code.
   * Serial communication to the instrument was not reliable on a Linux system.  The port would stop responding after 10-20 seconds of inactivity.  (I suspect this is a bug in the USB-serial conversion inside the instrument.)
 
 The gds_1000b_scpi code is written in python3, functions are written to be independent where possible.  Concepts were borrowed from OpenWave, but nearly all was rewritten.
@@ -20,7 +20,7 @@ This is a work in progress.  Version 0.0 works in Jupyter Notebook, but just bar
 
 ## Files:
   * gds_scpi.py
-      * functions to interact with GDS scope.  Import functions:  `from gds_scipy import function_name`
+      * functions to interact with GDS scope.  Import functions:  `from gds_scpi import function_name`
   * run_demo.py 
       * run the screen image demo from command line:  `python run_demo.py`
   * screen_image_demo.ipynb
