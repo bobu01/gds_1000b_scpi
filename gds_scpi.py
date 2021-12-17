@@ -44,7 +44,7 @@ from PIL import Image
 _VERSION_ = "0.0"
 
 # ============================================================================
-def scpi_query(cmd):
+def scpi_query(ser, cmd):
     ''' SCPI query: open port, send a query, get one line back, close port.
     Using pyserial context manager to open and close the port.
     Send characters very slowly for this type of query.  If not, the
@@ -60,7 +60,7 @@ def scpi_query(cmd):
     return str2    # port now closed
 
 # ============================================================================
-def scpi_set(cmd):
+def scpi_set(ser, cmd):
     ''' SCPI set command: open port, send the command, close the port.
     Using pyserial context manager to open and close the port.
     include 100ms sleep for instrument processing '''
@@ -72,7 +72,7 @@ def scpi_set(cmd):
     # port now closed
 
 # ============================================================================
-def scpi_acq_mem(chan):
+def scpi_acq_mem(ser, chan):
     ''' SCPI acquisition memory query: open port, turn off header, send fixed
     query. Read and parse up to '#'. Get char count, get integer count,
     get large block of signed int16 data.  Then close port.
@@ -116,7 +116,7 @@ def scpi_acq_mem(chan):
     return raw_list
 
 # ============================================================================
-def scpi_disp_out():
+def scpi_disp_out(ser):
     ''' SCPI display output query: Get a copy of the display image.
     Open port, send fixed query.  Read and parse header up to '#'. Get char
     count, get int count, get RLE image as a large block of uint16 pairs.
