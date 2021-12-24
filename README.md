@@ -31,16 +31,16 @@ This is a work in progress.  Version 0.0 works in Jupyter Notebook, but just bar
 
   * python 3.x
   * serial  >= ver 3.4
-      * see [https://pyserial.readthedocs.io/en/latest/](https://pyserial.readthedocs.io/en/latest/)
+      * see [pyserial.readthedocs](https://pyserial.readthedocs.io/en/latest/)
   * pillow  8.x
-      * see [https://pillow.readthedocs.io/en/stable/](https://pillow.readthedocs.io/en/stable/)
+      * see [pillow.readthedocs](https://pillow.readthedocs.io/en/stable/)
   * jupyter notebook ver 6.x
       * for ipynb support
 
-## What was tested:
+## What's tested:
 
-  * GDS-1202B scope with only 2 channels, BW 200MHz.  This does not have a network interface.  USB to serial port only.
-  * Linux computers:  Manjaro (Arch based) and Sparky Linux (Debian based)
+  * GDS-1202B scope with only 2 channels, BW 200MHz.  This unit does not have a network interface.  USB to serial port only.
+  * Linux systems:  Manjaro (Arch based) and Sparky Linux (Debian based)
   * Python 3.8.x for now
   * Jupyter Notebook and IPython kernel
   * Spyder 5
@@ -49,5 +49,6 @@ This is a work in progress.  Version 0.0 works in Jupyter Notebook, but just bar
 
   * Other GDS-1000B models, with 4 channels
   * Windows, Mac, RPi systems
+      * Hope to try Raspberry Pi OS soon
   * Older python versions
 

@@ -2,28 +2,12 @@
 # -*- coding: utf-8 -*-
 #  gds_scpi.py
 #  default file header
-#  Copyright 2021 bob <bob@e6330>
-#  
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#  
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#  
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#  MA 02110-1301, USA.
-#  
+#
 
 """
 Program name: gds_scpi.py
 ---------------------------------------------------
-Description: 
+Description:
 - Control a GW Instek GDS-1000B series digital oscilloscope over USB serial.
 - Based on OpenWave-1KB: https://github.com/OpenWave-GW/OpenWave-1KB.
 - Remove the QT GUI code.
@@ -38,7 +22,7 @@ Description:
     - Convert RLE object to python image format for export and display
 """
 import time
-import serial
+# import serial
 from PIL import Image
 
 _VERSION_ = "0.0"
@@ -72,23 +56,24 @@ def scpi_set(ser, cmd):
     # port now closed
 
 # ============================================================================
-def scpi_acq_mem(ser, chan):
-    ''' SCPI acquisition memory query: open port, turn off header, send fixed
-    query. Read and parse up to '#'. Get char count, get integer count,
-    get large block of signed int16 data.  Then close port.
+def scpi_acq_mem_head(ser, chan):
+    ''' SCPI acquisition memory query: open port, turn ON header, send
+    query. Read up to b'#'. Put header items into a directory object.
+    Get char count, get integer digit count, get large block of signed
+    int16 data. Then close port.
     Using pyserial context manager to open and close the port.
     Send characters very slowly for the query part. If not, the
     instrument won't reply.
-    if channel number is invalid, instrument won't reply.
-    returns a list of signed 8-bit ADC values, (-128...+127) in this case
-    This function ignores the channel header. '''
+    If channel number is invalid, instrument won't reply.
+    Returns a directory of channel acq settings and a list of signed int,
+    ADC (8-bit) values, (-128...+127) '''
 
     assert 1 <= chan <= 4, "Invalid channel number"
     # prepare command string
     cmd = ':ACQ' + str(int(chan)) + ':MEM?\n'
 
     with ser as ser1:    # new context, open port
-        ser1.write(':HEAD OFF\n'.encode(encoding='ascii'))  # use 7-bit ASCII
+        ser1.write(':HEAD ON\n'.encode(encoding='ascii'))  # use 7-bit ASCII
         time.sleep(0.1)
 
         # send query command characters very slowly
@@ -96,23 +81,89 @@ def scpi_acq_mem(ser, chan):
             ser1.write(str1.encode(encoding='ascii'))  # use 7-bit ASCII
             time.sleep(0.2)
 
-        # read until '#' header identifier
-        while ser1.read(1).decode() != '#':
-            pass
+        # read the acquisition settings header
+        header_b = bytearray()
+        # read until '#' block header identifier
+        while True:
+            byte1 = ser1.read(1)
+            if byte1 == b'#':
+                break
+            header_b += byte1
 
-        # get character count for numeric header
+        # parse acquisition header into directory object
+        acq_dir = {}
+        # split header items by semicolon
+        for i in header_b.decode().split(';'):
+            # then split by comma if it's there
+            if ',' in i:
+                j, k = i.split(',')
+                try:
+                    # try to convert numeric values to float
+                    k = float(k)
+                except ValueError:
+                    pass   # if not numeric, leave unchanged
+                # add item to dictionary
+                acq_dir[j] = k
+
+        # get character count in serial block header
         char_count = int(ser1.read(1).decode())
-        # get byte count number and divide by 2
-        int_count = int(ser1.read(char_count).decode()) // 2
+        # get serial block byte count number and divide by 2 bytes
+        block_count = int(ser1.read(char_count).decode()) // 2
 
         # read a large list of signed integers
         raw_list = []
-        for i in range(int_count):
-            # read 2 bytes, convert to signed int
+        for i in range(block_count):
+            # read 2 bytes, convert to signed int, BIG endian
             val1 = int.from_bytes(
-                ser1.read(2), byteorder='little', signed=True)
+                ser1.read(2), byteorder='big', signed=True)
             raw_list.append(val1)
-        # close port end of context
+    # close port end of context
+    return acq_dir, raw_list
+
+# ============================================================================
+def scpi_acq_mem_nohead(ser, chan):
+    ''' SCPI acquisition memory query: open port, turn OFF header, send
+    query. Read up to b'#'. Ignore header
+    Get char count, get integer digit count, get large block of signed
+    int16 data. Then close port.
+    Using pyserial context manager to open and close the port.
+    Send characters very slowly for the query part. If not, the
+    instrument won't reply.
+    If channel number is invalid, instrument won't reply.
+    Returns a list of signed int,
+    ADC (8-bit) values, (-128...+127) '''
+
+    assert 1 <= chan <= 4, "Invalid channel number"
+    # prepare command string
+    cmd = ':ACQ' + str(int(chan)) + ':MEM?\n'
+
+    with ser as ser1:    # new context, open port
+        ser1.write(':HEAD ON\n'.encode(encoding='ascii'))  # use 7-bit ASCII
+        time.sleep(0.1)
+
+        # send query command characters very slowly
+        for str1 in cmd:
+            ser1.write(str1.encode(encoding='ascii'))  # use 7-bit ASCII
+            time.sleep(0.2)
+
+        # ignore acquisition header
+        # read until '#' block header identifier
+        while ser1.read(1).decode() != '#':
+            pass
+
+        # get character count in byte block header
+        char_count = int(ser1.read(1).decode())
+        # get block byte count number and divide by 2 bytes
+        block_count = int(ser1.read(char_count).decode()) // 2
+
+        # read a large list of signed integers
+        raw_list = []
+        for i in range(block_count):
+            # read 2 bytes, convert to signed int, BIG endian
+            val1 = int.from_bytes(
+                ser1.read(2), byteorder='big', signed=True)
+            raw_list.append(val1)
+    # close port end of context
     return raw_list
 
 # ============================================================================
@@ -148,7 +199,7 @@ def scpi_disp_out(ser):
         # no image decoding yet.
         rle_list = []
         for i in range(pixel_pairs):
-            # convert 2 pairs of bytes to unsigned ints
+            # read and convert 2 pairs of LITTLE endian bytes to uint16
             pixel_count = int.from_bytes(
                 ser1.read(2), byteorder='little', signed=False)
             pixel_color = int.from_bytes(
@@ -167,7 +218,7 @@ def expand_rle(rle_thing):
     rasterize, convert RGB565 color space, return an image object
     measured 186 ms per loop for a detailed test image '''
 
-    assert type(rle_thing) == list, "RLE object isn't a list."
+    assert isinstance(rle_thing, list), "RLE object isn't a list."
 
     # expand runs of pixels into a new list
     img_list = []
