@@ -21,11 +21,21 @@ This is a work in progress.  Version 0.0 works in Jupyter Notebook, but just bar
 ## Files:
   * gds_scpi.py
       * functions to interact with GDS scope.  Import functions:  `from gds_scpi import function_name`
-  * run_demo.py 
-      * run the screen image demo from command line:  `python run_demo.py`
+  * run_image_demo.py 
+      * run the screen image demo from command line:  `python run_image_demo.py`
   * screen_image_demo.ipynb
       * Jupyter notebook page to show the screen image
-  * and more ....
+  * run_acq_data_demo.py
+      * run the demo to get waveform data, scale it and plot it
+  * acquisition_data_demo.ipynb 
+      * Jupyter notebook page to get, scale and plot waveform data
+      * this uses inline plotting
+
+## Speed
+  * run_acq_data_demo.py was able to read and plot 100k points in 6 seconds
+  * 1M point waveform took 22 seconds to read and plot
+  * 10M point waveform took 2 min 55 seconds to read and plot
+  * Most delay seems to be in getting raw data from the scope port.  It's not native USB, it's an emulated serial port.
 
 ## Dependencies
 
@@ -41,7 +51,7 @@ This is a work in progress.  Version 0.0 works in Jupyter Notebook, but just bar
 
   * GDS-1202B scope with only 2 channels, BW 200MHz.  This unit does not have a network interface.  USB to serial port only.
   * Linux systems:  Manjaro (Arch based) and Sparky Linux (Debian based)
-  * Python 3.8.x for now
+  * Python 3.8.x for now.  Now using Python 3.9.7
   * Jupyter Notebook and IPython kernel
   * Spyder 5
 
