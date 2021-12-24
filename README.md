@@ -27,6 +27,7 @@ This is a work in progress.  Version 0.0 works in Jupyter Notebook, but just bar
       * Jupyter notebook page to show the screen image
   * run_acq_data_demo.py
       * run the demo to get waveform data, scale it and plot it
+      * run from command line:  `python run_acq_data_demo.py`
   * acquisition_data_demo.ipynb 
       * Jupyter notebook page to get, scale and plot waveform data
       * this uses inline plotting
